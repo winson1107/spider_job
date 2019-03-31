@@ -1,0 +1,21 @@
+
+# JetBrains IDE settings
+.idea/
+
+# OSX specials
+._*
+.DS_Store
+#node modules
+node_modules/
+
+# Composer files
+vendor/
+
+# Sensitive credentials
+*.env
+
+#chrome
+chrome.zip
+chrome-*/
+
+test/
