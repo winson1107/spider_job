@@ -2,6 +2,11 @@
   "mgo_uri": "mongodb://127.0.0.1",
   "database":"job",
   "ip":"",
-  "port":8080,
-  "time_out":1000
+  "port":8088,
+  "time_out":1000,
+  "tbk":{
+    "app_id":"",
+    "app_secret":"",
+    "ad_zone_id":""
+  }
 }

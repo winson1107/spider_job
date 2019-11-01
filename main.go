@@ -19,15 +19,15 @@ func SetCors(app *gin.Engine)  {
 	app.Use(cors.New(cors.Config{
 		AllowOrigins:     []string{"*"},
 		AllowMethods:     []string{"PUT","GET","POST","OPTIONS"},
-		AllowHeaders:     []string{"Origin","content-type","v"},
-		ExposeHeaders:    []string{"Content-Length","content-type","v"},
+		AllowHeaders:     []string{"Origin","content-type","token"},
+		ExposeHeaders:    []string{"Content-Length","content-type","token"},
 		AllowCredentials: true,
 		MaxAge: 12 * time.Hour,
 	}))
 }
 
-func AddRouter(router *gin.Engine)  {
-	g := router.Group("/" + APIVersion)
+func AddRouter(engine *gin.Engine)  {
+	g := engine.Group("/" + APIVersion)
 	g.Any("/", handler.Index)
 	g.GET("/company",handler.CompanyList)
 	g.POST("/company",handler.AddCompany)
@@ -45,18 +45,22 @@ func AddRouter(router *gin.Engine)  {
 		_ = json.Unmarshal(data,&result)
 		c.JSON(200,result)
 	})
+	g.GET("/tbk",handler.TbkIndex)
+	g.GET("/tbk/search",handler.Search)
+	g.POST("/tbk/pwd",handler.Pwd)
 }
 
 func Run()  {
 	gin.SetMode(gin.ReleaseMode)
-	router := gin.Default()
-	SetCors(router)
-	AddRouter(router)
-	log.Fatal(router.Run(config.Conf.Ip + ":"+strconv.Itoa(config.Conf.Port)))
+	engine := gin.Default()
+	SetCors(engine)
+	AddRouter(engine)
+	log.Fatal(engine.Run(config.Conf.Ip + ":"+strconv.Itoa(config.Conf.Port)))
 }
 func main()  {
 	//初始化配置
 	err := config.Init("./config.json")
+	handler.Init()
 	if err != nil {
 		log.Fatal(err)
 	}
