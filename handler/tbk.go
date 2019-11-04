@@ -120,6 +120,7 @@ func parseKeyword(keyword string) string {
 	var err error
 	regs := []string{
 		`\$[a-zA-Z0-9]{5,}\$`,
+		`￥[$[a-zA-Z0-9]{5,}]￥`,
 		`([\x{00A0}-\x{02AF}]){1}[a-zA-Z0-9]{5,15}[\x{00A0}-\x{02AF}]`,
 		`([\x{20A0}-\x{20CF}]){1}[a-zA-Z0-9]{5,15}[\x{20A0}-\x{20CF}]`,
 	}
