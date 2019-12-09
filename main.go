@@ -48,6 +48,7 @@ func AddRouter(engine *gin.Engine)  {
 	g.GET("/tbk",handler.TbkIndex)
 	g.GET("/tbk/search",handler.Search)
 	g.POST("/tbk/pwd",handler.Pwd)
+	g.POST("/visit",handler.PostVisit)
 }
 
 func Run()  {
