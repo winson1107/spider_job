@@ -1,52 +1,60 @@
 package lib
 
 import (
-	"crypto/cipher"
+	"bytes"
 	"crypto/aes"
-	"log"
+	"crypto/cipher"
 	"encoding/base64"
+	"fmt"
 )
 
 const (
-	aesKey = "abcdefgh12345678abcdefgh"
-	aesIv = "abcdabcd12345678"
+	aesKey = "1234567890123456"
+	aesIv  = "Impassphrasegood"
 )
 
-
-//加密
-func AesEny(plaintext []byte) string {
-	var(
-		block cipher.Block
-		err error
-	)
-	//创建aes
-	if block, err = aes.NewCipher([]byte(aesKey)); err != nil{
-		log.Fatal(err)
+func AESEncrypt(src string) (string, error) {
+	block, err := aes.NewCipher([]byte(aesKey))
+	if err != nil {
+		fmt.Println("key error1", err)
+		return "", err
 	}
-	//创建ctr
-	stream := cipher.NewCTR(block, []byte(aesIv))
-	//加密, src,dst 可以为同一个内存地址
-	stream.XORKeyStream(plaintext, plaintext)
-	return base64.StdEncoding.EncodeToString(plaintext)
+	if src == "" {
+		return "", fmt.Errorf("plain content empty")
+	}
+	ecb := cipher.NewCBCEncrypter(block, []byte(aesIv))
+	content := []byte(src)
+	content = PKCS5Padding(content, block.BlockSize())
+	crypted := make([]byte, len(content))
+	ecb.CryptBlocks(crypted, content)
+	return base64.StdEncoding.EncodeToString(crypted), nil
 }
 
-
-//解密
-func AesDec(ciptext []byte) (string,error) {
-	var(
-		block cipher.Block
-		err error
-	)
-	ciptext,err = base64.StdEncoding.DecodeString(string(ciptext))
+func AESDecrypt(crypt string) ([]byte, error) {
+	dst, err := base64.StdEncoding.DecodeString(crypt)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
-	//创建aes
-	if block, err = aes.NewCipher([]byte(aesKey)); err != nil{
-		return "", err
+	block, err := aes.NewCipher([]byte(aesKey))
+	if err != nil {
+		return nil, err
 	}
-	//创建ctr
-	stream := cipher.NewCTR(block,[]byte(aesIv))
-	stream.XORKeyStream(ciptext, ciptext)
-	return string(ciptext),nil
+	if len(dst) == 0 {
+		return nil, fmt.Errorf("plain content empty")
+	}
+	ecb := cipher.NewCBCDecrypter(block, []byte(aesIv))
+	decrypted := make([]byte, len(dst))
+	ecb.CryptBlocks(decrypted, dst)
+	return PKCS5Trimming(decrypted), nil
+}
+
+func PKCS5Padding(ciphertext []byte, blockSize int) []byte {
+	padding := blockSize - len(ciphertext)%blockSize
+	padtext := bytes.Repeat([]byte{byte(padding)}, padding)
+	return append(ciphertext, padtext...)
+}
+
+func PKCS5Trimming(encrypt []byte) []byte {
+	padding := encrypt[len(encrypt)-1]
+	return encrypt[:len(encrypt)-int(padding)]
 }

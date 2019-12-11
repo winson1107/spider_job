@@ -2,14 +2,13 @@ package lib
 
 import (
 	"testing"
-	"log"
+	"fmt"
 )
-
-func TestAesDec(t *testing.T) {
-	s,_ := AesDec([]byte("YlnC/RzgAxlWlAg="))
-	log.Println(s)
-}
 func TestAesEny(t *testing.T) {
-	s := AesEny([]byte("test"))
-	log.Println(s)
+	var plainText = "admin"
+
+	encryptedData,_ := AESEncrypt(plainText)
+	fmt.Println(encryptedData)
+	decryptedText,_ := AESDecrypt(encryptedData)
+	fmt.Println(string(decryptedText))
 }
