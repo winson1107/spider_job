@@ -18,6 +18,11 @@ type ResponseItem struct {
 }
 
 type PageParams struct {
+	Page     int ` json:"pageNo" form:"pageNo"`
+	PageSize int ` json:"pageSize" form:"pageSize"`
+}
+
+type Pagination struct {
 	Page     int   ` json:"pageNo" form:"pageNo"`
 	PageSize int   ` json:"pageSize" form:"pageSize"`
 	Total    int64 `json:"total"`
@@ -61,7 +66,8 @@ func PostVisit(ctx *gin.Context) {
 }
 
 func GetVisit(ctx *gin.Context) {
-	params, err := getParams(ctx)
+	params := &models.QueryParam{}
+	err := ctx.ShouldBindQuery(params)
 	user, exist := ctx.Get("user")
 	if err != nil || !exist {
 		ctx.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
@@ -70,7 +76,13 @@ func GetVisit(ctx *gin.Context) {
 		})
 		return
 	}
-	result := models.GetLogs(user.(string), int64(params.Page), int64(params.PageSize))
+	if params.Page == 0 {
+		params.Page = 1
+	}
+	if params.PageSize == 0 {
+		params.PageSize = 10
+	}
+	result := models.GetLogs(user.(string), params)
 	items := make([]ResponseItem, 0)
 	for _, item := range result {
 		items = append(items, ResponseItem{
@@ -82,11 +94,14 @@ func GetVisit(ctx *gin.Context) {
 		})
 	}
 	//pagination := []int{}
-	params.Total = models.GetUserVisitCount(user.(string))
+	pagination := Pagination{}
+	pagination.Total = models.GetUserVisitCount(user.(string), params)
+	pagination.PageSize = params.PageSize
+	pagination.Page = params.Page
 	ctx.JSON(http.StatusOK, gin.H{
 		"code":       "200",
 		"msg":        "ok",
 		"data":       items,
-		"pagination": params,
+		"pagination": pagination,
 	})
 }
